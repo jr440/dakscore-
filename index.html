@@ -354,59 +354,6 @@
             </div>
         </div>
     </div>
-
-    <script>
-        // Set current date
-        document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-        });
-        
-        // Initialize variables
-        const ratingGroups = ['sleep-quality', 'energy-level', 'pain-level', 'emotional-state', 'cognitive-clarity', 'stress-level'];
-        const ratings = {};
-        let trendChart;
-
-        // Rating buttons functionality
-        ratingGroups.forEach(group => {
-            const buttons = document.querySelectorAll(`#${group} .rating-button`);
-            buttons.forEach(button => {
-                button.addEventListener('click', () => {
-                    buttons.forEach(b => b.setAttribute('data-selected', 'false'));
-                    button.setAttribute('data-selected', 'true');
-                    ratings[group] = parseInt(button.getAttribute('data-value'));
-                    updateSummary();
-                });
-            });
-        });
-
-        // Support needs checkboxes
-        const supportNeeds = [
-            'verbal-prompts', 'written-instructions', 'sensory-reduction', 
-            'processing-time', 'physical-assistance', 'emotional-support', 'task-initiation'
-        ];
-        
-        const selectedSupports = {};
-        supportNeeds.forEach(need => {
-            const checkbox = document.getElementById(need);
-            checkbox.addEventListener('change', () => {
-                selectedSupports[need] = checkbox.checked;
-                updateSummary();
-            });
-            selectedSupports[need] = false;
-        });
-
-        // Initialize trend chart
-        function initTrendChart() {
-            const ctx = document.getElementById('trendChart').getContext('2d');
-            trendChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: [],
-                    datasets: [
-                        {
-                            label: 'Overall',
-                            data: [],
-                
+    <script src="script.js"></script>
+</body>
+</html>
