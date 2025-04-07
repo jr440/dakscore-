@@ -1,0 +1,471 @@
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Morning Capability Assessment</title>
+    <style>
+      :root {
+        --primary-bg: #1a1a1a;
+        --card-bg: #2d2d2d;
+        --text-color: #ffffff;
+        --border-color: #444444;
+        --green: #2ecc71;
+        --yellow: #f1c40f;
+        --orange: #e67e22;
+        --red: #e74c3c;
+        --blue: #3498db;
+      }
+      
+      body {
+        font-family: 'Roboto', sans-serif;
+        background-color: var(--primary-bg);
+        color: var(--text-color);
+        margin: 0;
+        padding: 20px;
+      }
+      
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      
+      .card {
+        background-color: var(--card-bg);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--border-color);
+      }
+      
+      h1, h2 {
+        margin-top: 0;
+        color: var(--text-color);
+      }
+      
+      .date {
+        font-size: 1.2em;
+        margin-bottom: 20px;
+        color: var(--blue);
+      }
+      
+      .category {
+        margin-bottom: 15px;
+      }
+      
+      .rating-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+      
+      .rating-label {
+        width: 150px;
+        font-weight: bold;
+      }
+      
+      .rating-buttons {
+        display: flex;
+        gap: 10px;
+      }
+      
+      .rating-button {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 2px solid var(--border-color);
+        background-color: transparent;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        transition: all 0.2s ease;
+      }
+      
+      .rating-button:hover {
+        transform: scale(1.1);
+      }
+      
+      .rating-button[data-selected="true"] {
+        border-width: 3px;
+      }
+      
+      .rating-1 { color: var(--red); border-color: var(--red); }
+      .rating-1[data-selected="true"] { background-color: var(--red); color: white; }
+      
+      .rating-2 { color: var(--orange); border-color: var(--orange); }
+      .rating-2[data-selected="true"] { background-color: var(--orange); color: white; }
+      
+      .rating-3 { color: var(--yellow); border-color: var(--yellow); }
+      .rating-3[data-selected="true"] { background-color: var(--yellow); color: white; }
+      
+      .rating-4 { color: var(--blue); border-color: var(--blue); }
+      .rating-4[data-selected="true"] { background-color: var(--blue); color: white; }
+      
+      .rating-5 { color: var(--green); border-color: var(--green); }
+      .rating-5[data-selected="true"] { background-color: var(--green); color: white; }
+      
+      .support-needs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 15px;
+      }
+      
+      .support-checkbox {
+        display: flex;
+        align-items: center;
+        background-color: rgba(255, 255, 255, 0.1);
+        padding: 8px 15px;
+        border-radius: 20px;
+        cursor: pointer;
+        user-select: none;
+      }
+      
+      .support-checkbox input {
+        margin-right: 8px;
+      }
+      
+      .summary {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: rgba(52, 152, 219, 0.2);
+        border-radius: 8px;
+      }
+      
+      .summary-title {
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+      
+      .summary-text {
+        font-size: 1.1em;
+      }
+      
+      .action-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+      }
+      
+      .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.2s;
+      }
+      
+      .btn-save {
+        background-color: var(--green);
+        color: white;
+      }
+      
+      .btn-reset {
+        background-color: var(--red);
+        color: white;
+      }
+      
+      .status-indicator {
+        height: 20px;
+        border-radius: 10px;
+        margin-top: 15px;
+        background: linear-gradient(to right, var(--red), var(--orange), var(--yellow), var(--blue), var(--green));
+        position: relative;
+      }
+      
+      .status-marker {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background-color: white;
+        border-radius: 50%;
+        top: 0;
+        transform: translateX(-50%);
+        transition: left 0.3s ease;
+      }
+      
+      @media (max-width: 600px) {
+        .rating-container {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        
+        .rating-label {
+          margin-bottom: 5px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <h1>Morning Capability Assessment</h1>
+        <div class="date" id="current-date">April 8, 2025</div>
+        
+        <h2>Physical Resources</h2>
+        <div class="category">
+          <div class="rating-container">
+            <div class="rating-label">Sleep Quality:</div>
+            <div class="rating-buttons" id="sleep-quality">
+              <button class="rating-button rating-1" data-value="1">1</button>
+              <button class="rating-button rating-2" data-value="2">2</button>
+              <button class="rating-button rating-3" data-value="3">3</button>
+              <button class="rating-button rating-4" data-value="4">4</button>
+              <button class="rating-button rating-5" data-value="5">5</button>
+            </div>
+          </div>
+          
+          <div class="rating-container">
+            <div class="rating-label">Energy Level:</div>
+            <div class="rating-buttons" id="energy-level">
+              <button class="rating-button rating-1" data-value="1">1</button>
+              <button class="rating-button rating-2" data-value="2">2</button>
+              <button class="rating-button rating-3" data-value="3">3</button>
+              <button class="rating-button rating-4" data-value="4">4</button>
+              <button class="rating-button rating-5" data-value="5">5</button>
+            </div>
+          </div>
+          
+          <div class="rating-container">
+            <div class="rating-label">Pain Level:</div>
+            <div class="rating-buttons" id="pain-level">
+              <button class="rating-button rating-1" data-value="1">1</button>
+              <button class="rating-button rating-2" data-value="2">2</button>
+              <button class="rating-button rating-3" data-value="3">3</button>
+              <button class="rating-button rating-4" data-value="4">4</button>
+              <button class="rating-button rating-5" data-value="5">5</button>
+            </div>
+          </div>
+        </div>
+        
+        <h2>Mental Resources</h2>
+        <div class="category">
+          <div class="rating-container">
+            <div class="rating-label">Emotional State:</div>
+            <div class="rating-buttons" id="emotional-state">
+              <button class="rating-button rating-1" data-value="1">1</button>
+              <button class="rating-button rating-2" data-value="2">2</button>
+              <button class="rating-button rating-3" data-value="3">3</button>
+              <button class="rating-button rating-4" data-value="4">4</button>
+              <button class="rating-button rating-5" data-value="5">5</button>
+            </div>
+          </div>
+          
+          <div class="rating-container">
+            <div class="rating-label">Cognitive Clarity:</div>
+            <div class="rating-buttons" id="cognitive-clarity">
+              <button class="rating-button rating-1" data-value="1">1</button>
+              <button class="rating-button rating-2" data-value="2">2</button>
+              <button class="rating-button rating-3" data-value="3">3</button>
+              <button class="rating-button rating-4" data-value="4">4</button>
+              <button class="rating-button rating-5" data-value="5">5</button>
+            </div>
+          </div>
+          
+          <div class="rating-container">
+            <div class="rating-label">Stress Level:</div>
+            <div class="rating-buttons" id="stress-level">
+              <button class="rating-button rating-1" data-value="1">1</button>
+              <button class="rating-button rating-2" data-value="2">2</button>
+              <button class="rating-button rating-3" data-value="3">3</button>
+              <button class="rating-button rating-4" data-value="4">4</button>
+              <button class="rating-button rating-5" data-value="5">5</button>
+            </div>
+          </div>
+        </div>
+        
+        <h2>Support Needs</h2>
+        <div class="support-needs">
+          <label class="support-checkbox">
+            <input type="checkbox" id="verbal-prompts"> Verbal prompts
+          </label>
+          <label class="support-checkbox">
+            <input type="checkbox" id="written-instructions"> Written instructions
+          </label>
+          <label class="support-checkbox">
+            <input type="checkbox" id="sensory-reduction"> Sensory reduction
+          </label>
+          <label class="support-checkbox">
+            <input type="checkbox" id="processing-time"> Extended processing time
+          </label>
+          <label class="support-checkbox">
+            <input type="checkbox" id="physical-assistance"> Physical assistance
+          </label>
+          <label class="support-checkbox">
+            <input type="checkbox" id="emotional-support"> Emotional co-regulation
+          </label>
+          <label class="support-checkbox">
+            <input type="checkbox" id="task-initiation"> Task initiation help
+          </label>
+        </div>
+        
+        <div class="summary">
+          <div class="summary-title">Overall Capacity:</div>
+          <div class="summary-text" id="summary-text">Complete the assessment to see your summary</div>
+          <div class="status-indicator">
+            <div class="status-marker" id="status-marker" style="left: 10%"></div>
+          </div>
+        </div>
+        
+        <div class="action-buttons">
+          <button class="btn btn-reset" id="reset-btn">Reset</button>
+          <button class="btn btn-save" id="save-btn">Save & Share</button>
+        </div>
+      </div>
+    </div>
+    
+    <script>
+      // Set current date
+      document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+      
+      // Rating buttons functionality
+      const ratingGroups = ['sleep-quality', 'energy-level', 'pain-level', 'emotional-state', 'cognitive-clarity', 'stress-level'];
+      const ratings = {};
+      
+      ratingGroups.forEach(group => {
+        const buttons = document.querySelectorAll(`#${group} .rating-button`);
+        buttons.forEach(button => {
+          button.addEventListener('click', () => {
+            // Clear selected in this group
+            buttons.forEach(b => b.setAttribute('data-selected', 'false'));
+            // Set this button as selected
+            button.setAttribute('data-selected', 'true');
+            // Store rating
+            ratings[group] = parseInt(button.getAttribute('data-value'));
+            updateSummary();
+          });
+        });
+      });
+      
+      // Support needs checkboxes
+      const supportNeeds = [
+        'verbal-prompts', 'written-instructions', 'sensory-reduction', 
+        'processing-time', 'physical-assistance', 'emotional-support', 'task-initiation'
+      ];
+      
+      const selectedSupports = {};
+      supportNeeds.forEach(need => {
+        const checkbox = document.getElementById(need);
+        checkbox.addEventListener('change', () => {
+          selectedSupports[need] = checkbox.checked;
+          updateSummary();
+        });
+        selectedSupports[need] = false;
+      });
+      
+      // Reset button
+      document.getElementById('reset-btn').addEventListener('click', () => {
+        // Clear all ratings
+        document.querySelectorAll('.rating-button').forEach(button => {
+          button.setAttribute('data-selected', 'false');
+        });
+        
+        // Clear all checkboxes
+        supportNeeds.forEach(need => {
+          document.getElementById(need).checked = false;
+          selectedSupports[need] = false;
+        });
+        
+        // Reset stored ratings
+        ratingGroups.forEach(group => {
+          ratings[group] = undefined;
+        });
+        
+        // Update summary
+        updateSummary();
+      });
+      
+      // Save button
+      document.getElementById('save-btn').addEventListener('click', () => {
+        // In a real implementation, this would save to local storage or a database
+        // For DakBoard integration, this could trigger an API call or update a shared data source
+        
+        const data = {
+          date: new Date().toISOString(),
+          ratings: ratings,
+          supportNeeds: selectedSupports,
+          summary: calculateSummary()
+        };
+        
+        // For demonstration, just show an alert
+        alert('Assessment saved! In a real implementation, this would be shared with Amanda.');
+        console.log('Saved data:', data);
+        
+        // In a real implementation with DakBoard:
+        // 1. Save to Google Sheets (which DakBoard can read)
+        // 2. Update a JSON endpoint that DakBoard can pull from
+        // 3. Use IFTTT to trigger notifications
+      });
+      
+      // Calculate and update summary
+      function updateSummary() {
+        const summary = calculateSummary();
+        const summaryText = document.getElementById('summary-text');
+        const statusMarker = document.getElementById('status-marker');
+        
+        if (summary.average === null) {
+          summaryText.textContent = 'Complete the assessment to see your summary';
+          statusMarker.style.left = '10%';
+          return;
+        }
+        
+        // Update text summary
+        let capacityLevel;
+        if (summary.average <= 1.5) {
+          capacityLevel = 'Critical capacity';
+        } else if (summary.average <= 2.5) {
+          capacityLevel = 'Limited capacity';
+        } else if (summary.average <= 3.5) {
+          capacityLevel = 'Moderate capacity';
+        } else if (summary.average <= 4.5) {
+          capacityLevel = 'Good capacity';
+        } else {
+          capacityLevel = 'Optimal capacity';
+        }
+        
+        const supportList = Object.entries(selectedSupports)
+          .filter(([_, selected]) => selected)
+          .map(([id, _]) => id.replace('-', ' '))
+          .join(', ');
+        
+        summaryText.textContent = `${capacityLevel} (${summary.average.toFixed(1)}/5). Physical: ${summary.physical.toFixed(1)}, Mental: ${summary.mental.toFixed(1)}. ${supportList ? 'Support needs: ' + supportList : ''}`;
+        
+        // Update status marker position (0% = left/worst, 100% = right/best)
+        const position = (summary.average / 5) * 100;
+        statusMarker.style.left = `${position}%`;
+      }
+      
+      function calculateSummary() {
+        // Check if all ratings are provided
+        const physicalRatings = ['sleep-quality', 'energy-level', 'pain-level'].map(id => ratings[id]);
+        const mentalRatings = ['emotional-state', 'cognitive-clarity', 'stress-level'].map(id => ratings[id]);
+        
+        const allRatings = [...physicalRatings, ...mentalRatings];
+        
+        if (allRatings.some(r => r === undefined)) {
+          return { average: null, physical: null, mental: null };
+        }
+        
+        // Calculate averages
+        const physicalAvg = physicalRatings.reduce((sum, val) => sum + val, 0) / physicalRatings.length;
+        const mentalAvg = mentalRatings.reduce((sum, val) => sum + val, 0) / mentalRatings.length;
+        const overallAvg = allRatings.reduce((sum, val) => sum + val, 0) / allRatings.length;
+        
+        return {
+          average: overallAvg,
+          physical: physicalAvg,
+          mental: mentalAvg
+        };
+      }
+    </script>
+  </body>
+  </html>
