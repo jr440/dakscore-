@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Score Widget</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 10px;
+            background: transparent;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        .score-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .score-item {
+            width: 100%;
+            padding: 5px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .physical { background-color: rgba(65, 105, 225, 0.7); }
+        .mental { background-color: rgba(50, 205, 50, 0.7); }
+        .average { background-color: rgba(255, 165, 0, 0.7); }
+    </style>
+</head>
+<body>
+    <div class="score-container">
+        <div class="score-item physical">
+            Physical: <span id="physical">-</span>
+        </div>
+        <div class="score-item mental">
+            Mental: <span id="mental">-</span>
+        </div>
+        <div class="score-item average">
+            Average: <span id="average">-</span>
+        </div>
+    </div>
+    <script>
+        function updateScores() {
+            const data = JSON.parse(localStorage.getItem('dakboard_summary') || '{}');
+            document.getElementById('physical').textContent = 
+                (data.physical || 0).toFixed(1);
+            document.getElementById('mental').textContent = 
+                (data.mental || 0).toFixed(1);
+            document.getElementById('average').textContent = 
+                (data.average || 0).toFixed(1);
+        }
+        
+        // Update immediately and every 30 seconds
+        updateScores();
+        setInterval(updateScores, 30000);
+    </script>
+</body>
+</html>
