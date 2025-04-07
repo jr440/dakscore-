@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Morning Capability Assessment</title>
-    <!-- Add Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -231,13 +230,44 @@
                 flex-direction: column;
             }
         }
+
+        /* DakBoard Widget Styles */
+        .dakboard-widget {
+            background: transparent;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .dakboard-score {
+            font-size: 24px;
+            margin: 10px 0;
+        }
+
+        .dakboard-indicator {
+            height: 10px;
+            border-radius: 5px;
+            background: linear-gradient(to right, var(--red), var(--orange), var(--yellow), var(--blue), var(--green));
+            position: relative;
+            margin: 10px 0;
+        }
+
+        .dakboard-marker {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background-color: white;
+            border-radius: 50%;
+            top: -1px;
+            transform: translateX(-50%);
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="card">
             <h1>Morning Capability Assessment</h1>
-            <div class="date" id="current-date">April 8, 2025</div>
+            <div class="date" id="current-date"></div>
             
             <h2>Physical Resources</h2>
             <div class="category">
@@ -373,13 +403,8 @@
         // Initialize the page
         document.addEventListener('DOMContentLoaded', () => {
             // Set current date
-            const currentDate = new Date();
-            document.getElementById('current-date').textContent = currentDate.toLocaleDateString('en-US', {
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric'
-            });
-
+            updateCurrentDate();
+            
             // Add click handlers to all rating buttons
             const ratingButtons = document.querySelectorAll('.rating-button');
             ratingButtons.forEach(button => {
@@ -393,10 +418,21 @@
 
             // Initialize trend chart
             initTrendChart();
+            
+            // Load and display previous data
+            loadPreviousAssessment();
             updateTrendChart();
         });
 
-        // Handle rating button clicks
+        function updateCurrentDate() {
+            const currentDate = new Date();
+            document.getElementById('current-date').textContent = currentDate.toLocaleDateString('en-US', {
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+
         function handleRatingClick(event) {
             const button = event.target;
             if (!button.classList.contains('rating-button')) return;
@@ -411,7 +447,6 @@
             container.querySelectorAll('.rating-button').forEach(btn => {
                 btn.setAttribute('data-selected', 'false');
                 btn.classList.remove('selected');
-                // Remove background color classes
                 for (let i = 1; i <= 5; i++) {
                     btn.classList.remove(`rating-${i}-selected`);
                 }
@@ -427,47 +462,39 @@
 
             // Update summary
             updateSummary();
-            
-            console.log(`Updated ${category} to ${value}`);
         }
 
-        // Calculate and update summary
+        function calculateAverages() {
+            const physicalScores = Object.values(ratings).slice(0, 3).filter(v => v > 0);
+            const mentalScores = Object.values(ratings).slice(3).filter(v => v > 0);
+            
+            const summary = {
+                physical: physicalScores.length ? 
+                    physicalScores.reduce((a, b) => a + b) / physicalScores.length : 0,
+                mental: mentalScores.length ? 
+                    mentalScores.reduce((a, b) => a + b) / mentalScores.length : 0
+            };
+            
+            summary.average = (summary.physical + summary.mental) / 
+                ((summary.physical > 0 ? 1 : 0) + (summary.mental > 0 ? 1 : 0)) || 0;
+            
+            return summary;
+        }
+
         function updateSummary() {
-            const physicalScores = [
-                ratings['sleep-quality'],
-                ratings['energy-level'],
-                ratings['pain-level']
-            ].filter(score => score > 0);
+            const summary = calculateAverages();
 
-            const mentalScores = [
-                ratings['emotional-state'],
-                ratings['cognitive-clarity'],
-                ratings['stress-level']
-            ].filter(score => score > 0);
-
-            if (physicalScores.length > 0 || mentalScores.length > 0) {
-                const physicalAvg = physicalScores.length > 0 
-                    ? physicalScores.reduce((a, b) => a + b) / physicalScores.length 
-                    : 0;
-                const mentalAvg = mentalScores.length > 0 
-                    ? mentalScores.reduce((a, b) => a + b) / mentalScores.length 
-                    : 0;
-                const overallAvg = (physicalAvg + mentalAvg) / (physicalAvg && mentalAvg ? 2 : 1);
-
-                // Update summary text
+            if (summary.physical > 0 || summary.mental > 0) {
                 document.getElementById('summary-text').innerHTML = `
-                    Physical: ${physicalAvg.toFixed(1)}/5<br>
-                    Mental: ${mentalAvg.toFixed(1)}/5<br>
-                    Overall: ${overallAvg.toFixed(1)}/5
+                    Physical: ${summary.physical.toFixed(1)}/5<br>
+                    Mental: ${summary.mental.toFixed(1)}/5<br>
+                    Overall: ${summary.average.toFixed(1)}/5
                 `;
 
-                // Update status marker
-                const marker = document.getElementById('status-marker');
-                marker.style.left = `${(overallAvg / 5) * 100}%`;
+                document.getElementById('status-marker').style.left = `${(summary.average / 5) * 100}%`;
             }
         }
 
-        // Reset assessment
         function resetAssessment() {
             // Reset all ratings
             Object.keys(ratings).forEach(key => ratings[key] = 0);
@@ -476,7 +503,6 @@
             document.querySelectorAll('.rating-button').forEach(btn => {
                 btn.setAttribute('data-selected', 'false');
                 btn.classList.remove('selected');
-                // Remove background color classes
                 for (let i = 1; i <= 5; i++) {
                     btn.classList.remove(`rating-${i}-selected`);
                 }
@@ -490,20 +516,20 @@
             // Reset summary
             document.getElementById('summary-text').textContent = 'Complete the assessment to see your summary';
             document.getElementById('status-marker').style.left = '10%';
+            
+            // Update DakBoard data
+            localStorage.removeItem('dakboard_summary');
         }
 
-        // Save assessment
         function saveAssessment() {
+            const summary = calculateAverages();
             const assessment = {
                 date: new Date().toISOString(),
                 ratings: {...ratings},
                 supportNeeds: Array.from(document.querySelectorAll('.support-checkbox input'))
                     .filter(cb => cb.checked)
                     .map(cb => cb.id),
-                summary: {
-                    physical: Object.values(ratings).slice(0, 3).reduce((a, b) => a + b) / 3,
-                    mental: Object.values(ratings).slice(3).reduce((a, b) => a + b) / 3
-                }
+                summary: summary
             };
 
             // Save to localStorage
@@ -513,11 +539,35 @@
 
             // Update trend chart
             updateTrendChart();
+            
+            // Update DakBoard data
+            localStorage.setItem('dakboard_summary', JSON.stringify(summary));
 
             alert('Assessment saved successfully!');
         }
 
-        // Initialize trend chart
+        function loadPreviousAssessment() {
+            const savedAssessments = JSON.parse(localStorage.getItem('assessments') || '[]');
+            if (savedAssessments.length > 0) {
+                const lastAssessment = savedAssessments[savedAssessments.length - 1];
+                
+                // Load ratings
+                Object.keys(lastAssessment.ratings).forEach(category => {
+                    const value = lastAssessment.ratings[category];
+                    if (value > 0) {
+                        const button = document.querySelector(`#${category} .rating-button[data-value="${value}"]`);
+                        if (button) button.click();
+                    }
+                });
+                
+                // Load support needs
+                lastAssessment.supportNeeds.forEach(need => {
+                    const checkbox = document.getElementById(need);
+                    if (checkbox) checkbox.checked = true;
+                });
+            }
+        }
+
         function initTrendChart() {
             const ctx = document.getElementById('trendChart').getContext('2d');
             trendChart = new Chart(ctx, {
@@ -575,7 +625,6 @@
             });
         }
 
-        // Update trend chart
         function updateTrendChart() {
             const savedAssessments = JSON.parse(localStorage.getItem('assessments') || '[]');
             const recentAssessments = savedAssessments.slice(-7);
@@ -590,41 +639,17 @@
             trendChart.update();
         }
 
-        // Export to DakBoard
         function exportToDakBoard() {
-            const summary = {
-                physical: Object.values(ratings).slice(0, 3).reduce((a, b) => a + b) / 3,
-                mental: Object.values(ratings).slice(3).reduce((a, b) => a + b) / 3
-            };
-            summary.average = (summary.physical + summary.mental) / 2;
-
-            const currentTime = new Date().toLocaleTimeString();
-            const currentDate = new Date().toLocaleDateString();
+            const summary = calculateAverages();
             
-            const displayContent = `
-                <div style="font-family: Arial; padding: 20px; color: white; background: #1a1a1a;">
-                    <h2>Capability Assessment</h2>
-                    <p>Last Updated: ${currentDate} ${currentTime}</p>
-                    <div style="font-size: 24px; margin: 15px 0;">
-                        Overall: ${summary.average.toFixed(1)}/5
-                    </div>
-                    <div style="background: linear-gradient(to right, #e74c3c, #e67e22, #f1c40f, #2ecc71);
-                                height: 20px; border-radius: 10px; position: relative;">
-                        <div style="position: absolute; width: 20px; height: 20px; background: white;
-                                border-radius: 50%; left: ${(summary.average / 5) * 100}%;
-                                transform: translateX(-50%);"></div>
-                    </div>
-                    <div style="margin-top: 15px;">
-                        <p>Physical: ${summary.physical.toFixed(1)}/5</p>
-                        <p>Mental: ${summary.mental.toFixed(1)}/5</p>
-                    </div>
-                </div>
-            `;
-
-            const blob = new Blob([displayContent], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
+            // Save to localStorage for the widget to access
+            localStorage.setItem('dakboard_summary', JSON.stringify(summary));
             
-            alert(`Add this URL to DakBoard as a Website widget:\n${url}`);
+            // Use your GitHub Pages URL - replace with your actual username and repository
+            const widgetUrl = 'https://jr440.github.io/dakscore-/widget.html';
+            
+            // Show instructions
+            alert(`To add this to DakBoard:\n\n1. Add a new Custom Widget\n2. Select "Website"\n3. Enter this URL:\n${widgetUrl}\n4. Set refresh rate to 30-60 seconds\n5. Set width/height as needed`);
         }
     </script>
 </body>
