@@ -40,22 +40,28 @@ document.addEventListener('DOMContentLoaded', () => {
 function handleRatingClick(event) {
     const button = event.target;
     const value = parseInt(button.dataset.value);
-    const container = button.parentElement;
+    const container = button.closest('.rating-buttons'); // Change this line
     const category = container.id;
 
     // Remove selected state from all buttons in this category
     container.querySelectorAll('.rating-button').forEach(btn => {
         btn.setAttribute('data-selected', 'false');
+        // Remove any selected styling classes
+        btn.classList.remove('selected');
     });
 
     // Set selected state for clicked button
     button.setAttribute('data-selected', 'true');
+    button.classList.add('selected');
 
     // Store the rating
     ratings[category] = value;
 
     // Update summary
     updateSummary();
+    
+    // Optional: Add console log for debugging
+    console.log(`Updated ${category} to ${value}`);
 }
 
 // Calculate and update summary
